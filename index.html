@@ -2,236 +2,457 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>HTML Slide Editor - Enhanced UI</title>
+    <title>HTML Slide Editor - Modern UI</title>
     <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
       * {
         box-sizing: border-box;
       }
 
+      :root {
+        --primary-color: #6366f1;
+        --primary-hover: #5b5fd8;
+        --primary-light: #e0e7ff;
+        --secondary-color: #f1f5f9;
+        --accent-color: #10b981;
+        --accent-hover: #059669;
+        --danger-color: #ef4444;
+        --danger-hover: #dc2626;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --border-hover: #cbd5e1;
+        --background: #f8fafc;
+        --surface: #ffffff;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+          0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --radius-sm: 6px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+      }
+
       body {
         margin: 0;
-        font-family: "Segoe UI", Arial, sans-serif;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
         display: flex;
         flex-direction: column;
         height: 100vh;
         overflow: hidden;
-        background: #f0f2f5;
+        background: linear-gradient(135deg, var(--background) 0%, #f1f5f9 100%);
+        color: var(--text-primary);
+        line-height: 1.5;
       }
 
       .main-content-area {
         flex: 1;
         display: flex;
         flex-direction: column;
-        padding: 15px;
+        padding: 10px;
         overflow: hidden;
+        gap: 10px;
       }
 
       .topbar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #ddd;
-        background-color: #ffffff;
-        padding: 10px 15px;
-        border-radius: 8px 8px 0 0;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        background: var(--surface);
+        padding: 20px 24px;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.9);
       }
 
       .topbar h2 {
         margin: 0;
-        font-size: 18px;
-        color: #333;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
       }
 
-      .topbar button {
-        background: #007bff;
-        color: white;
+      .topbar h2::before {
+        content: "🎨";
+        font-size: 28px;
+      }
+
+      .topbar-buttons {
+        display: flex;
+        gap: 12px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
         border: none;
-        padding: 8px 15px;
-        border-radius: 6px;
+        border-radius: var(--radius-md);
         cursor: pointer;
         font-size: 14px;
-        transition: background-color 0.2s ease;
+        font-weight: 500;
+        font-family: inherit;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
       }
 
-      .topbar button:hover {
-        background: #0056b3;
+      .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .btn:hover::before {
+        left: 100%;
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-hover)
+        );
+        color: white;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .btn-success {
+        background: linear-gradient(
+          135deg,
+          var(--accent-color),
+          var(--accent-hover)
+        );
+        color: white;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .btn-secondary {
+        background: var(--secondary-color);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+      }
+
+      .btn-secondary:hover {
+        background: var(--border-hover);
+        transform: translateY(-1px);
+      }
+
+      .btn-danger {
+        background: linear-gradient(
+          135deg,
+          var(--danger-color),
+          var(--danger-hover)
+        );
+        color: white;
+      }
+
+      .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
       }
 
       #preview {
         flex: 1;
-        border: 1px solid #ccc;
-        border-radius: 0 0 8px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        background: var(--surface);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        padding: 20px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .slide-content {
         width: 100%;
-        background: white;
-        margin-top: -1px;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        border: 1px dashed var(--border-color);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--surface);
+        position: relative;
+        overflow: auto;
+      }
+
+      .slide-content.has-content {
+        border: none;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .slide-content-wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .slide-content-inner {
+        max-width: 100%;
+        max-height: 100%;
+        transform-origin: center center;
+        transition: transform 0.3s ease;
+      }
+
+      .empty-state {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 16px;
       }
 
       .bottom-slide-navigator {
-        height: 160px;
-        background: #ffffff;
-        border-top: 1px solid #ddd;
-        padding: 10px;
+        height: 170px;
+        background: var(--surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        padding: 20px;
         display: flex;
         align-items: center;
-        gap: 10px;
-        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
+        gap: 16px;
+        box-shadow: var(--shadow-md);
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.9);
       }
 
       .slide-list {
         list-style: none;
-        padding: 0 5px;
+        padding: 0;
         margin: 0;
         display: flex;
-        gap: 10px;
+        gap: 16px;
         flex-grow: 1;
         height: 100%;
-        overflow: hidden;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-behavior: smooth;
+      }
+
+      .slide-list::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      .slide-list::-webkit-scrollbar-track {
+        background: var(--secondary-color);
+        border-radius: 3px;
+      }
+
+      .slide-list::-webkit-scrollbar-thumb {
+        background: var(--border-hover);
+        border-radius: 3px;
+      }
+
+      .slide-list::-webkit-scrollbar-thumb:hover {
+        background: var(--text-secondary);
       }
 
       .slide-list li {
         position: relative;
-        width: 140px;
-        height: 110px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        background: #f9f9f9;
+        width: 160px;
+        height: 120px;
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        background: var(--surface);
         cursor: pointer;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
         overflow: hidden;
         flex-shrink: 0;
+        box-shadow: var(--shadow-sm);
       }
 
       .slide-list li.active {
-        border-color: #007bff;
-        box-shadow: 0 0 0 2px #007bff;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px var(--primary-light), var(--shadow-md);
+        transform: scale(1.05);
       }
 
-      .slide-list li:hover {
-        border-color: #999;
+      .slide-list li:hover:not(.active) {
+        border-color: var(--border-hover);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
       }
 
       .thumbnail-container {
-        width: 140px;
-        height: 78.75px;
-        margin-top: 5px;
+        width: 156px;
+        height: 87.75px;
+        margin-top: 6px;
         overflow: hidden;
-        border: 1px solid #eee;
+        border-radius: var(--radius-sm);
         position: relative;
+        background: var(--secondary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      .thumbnail-container iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-        pointer-events: none;
+      .thumbnail-content {
+        width: 1040px;
+        height: 585px;
+        transform: scale(0.15);
         transform-origin: top left;
-        background-color: #fff;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: white;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .thumbnail-placeholder {
+        color: var(--text-secondary);
+        font-size: 12px;
+        text-align: center;
       }
 
       .slide-number {
         position: absolute;
-        bottom: 3px;
-        left: 5px;
-        font-size: 10px;
-        color: #333;
-        background-color: rgba(255, 255, 255, 0.7);
-        padding: 1px 3px;
-        border-radius: 3px;
+        bottom: 6px;
+        left: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--surface);
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-hover)
+        );
+        padding: 4px 8px;
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-sm);
       }
 
       .add-slide-button-container {
         display: flex;
         align-items: center;
         justify-content: center;
-        padding-left: 10px;
         height: 100%;
       }
 
-      .bottom-slide-navigator button.add-slide {
-        padding: 10px 15px;
-        color: black;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-        white-space: nowrap;
-        transition: background-color 0.2s ease;
-        height: fit-content;
-      }
-      .bottom-slide-navigator button.add-slide:hover {
-        background: #218838;
-      }
-
       .popup {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        padding: 20px;
-        width: 600px;
-        max-width: 90%;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
         z-index: 1000;
         display: none;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .popup.show {
+        opacity: 1;
+      }
+
+      .popup-content {
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        padding: 32px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        box-shadow: var(--shadow-xl);
+        display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 20px;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+      }
+
+      .popup.show .popup-content {
+        transform: scale(1);
       }
 
       .popup h3 {
-        margin: 0 0 5px 0;
-        font-size: 18px;
-        color: #333;
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .popup h3::before {
+        content: "✏️";
+        font-size: 28px;
       }
 
       .popup textarea {
         width: 100%;
-        height: 250px;
-        font-family: "Consolas", "Courier New", monospace;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        padding: 10px;
+        height: 400px;
+        font-family: "SF Mono", "Monaco", "Cascadia Code", "Roboto Mono",
+          monospace;
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 16px;
         resize: vertical;
-        font-size: 13px;
+        font-size: 14px;
+        line-height: 1.6;
+        background: var(--secondary-color);
+        transition: border-color 0.2s ease;
+      }
+
+      .popup textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px var(--primary-light);
       }
 
       .popup-buttons {
         display: flex;
         justify-content: flex-end;
-        gap: 10px;
-      }
-
-      .popup-buttons button {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 6px;
-        color: white;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background-color 0.2s ease;
-      }
-
-      .popup-buttons .save {
-        background: #28a745;
-      }
-      .popup-buttons .save:hover {
-        background: #218838;
-      }
-
-      .popup-buttons .close {
-        background: #6c757d;
-      }
-      .popup-buttons .close:hover {
-        background: #5a6268;
+        gap: 12px;
       }
 
       #presentation-container {
@@ -247,82 +468,199 @@
         align-items: center;
       }
 
-      #presentation-iframe {
+      #presentation-content {
         width: 100%;
         height: 100%;
-        border: none;
+        background: white;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+      }
+
+      .presentation-slide {
+        width: 100%;
+        max-width: 1200px;
+        height: auto;
+        min-height: 600px;
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
       }
 
       .presentation-controls {
         position: fixed;
-        bottom: 20px;
+        bottom: 30px;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
-        gap: 20px;
+        gap: 16px;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        padding: 16px 24px;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-xl);
       }
 
-      .presentation-controls button {
-        background: #fff;
-        color: #000;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        cursor: pointer;
+      .presentation-controls .btn {
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--text-primary);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         font-size: 16px;
+        padding: 12px 24px;
       }
 
-      .presentation-controls button:hover {
-        background: #ddd;
+      .presentation-controls .btn:hover {
+        background: rgba(255, 255, 255, 1);
+        transform: translateY(-2px);
       }
 
-      .presentation-controls .exit {
-        background: #ff4444;
+      .presentation-controls .btn-danger {
+        background: var(--danger-color);
         color: white;
       }
 
-      .presentation-controls .exit:hover {
-        background: #cc0000;
+      /* Loading animation */
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .loading {
+        animation: pulse 2s infinite;
+      }
+
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Custom scrollbar for the main content */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--secondary-color);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--border-hover);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--text-secondary);
+      }
+
+      /* Responsive design */
+      @media (max-width: 768px) {
+        .main-content-area {
+          padding: 12px;
+          gap: 12px;
+        }
+
+        .topbar {
+          padding: 16px;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .topbar-buttons {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .popup-content {
+          padding: 20px;
+          margin: 20px;
+        }
+
+        .slide-list li {
+          width: 120px;
+          height: 90px;
+        }
+
+        .thumbnail-container {
+          width: 116px;
+          height: 65.25px;
+        }
       }
     </style>
   </head>
   <body>
     <div class="main-content-area">
       <div class="topbar">
-        <h2>Slide Preview</h2>
-        <button onclick="Editor.showPopup()">✏️ Edit HTML</button>
-        <button onclick="Editor.togglePresentation()">🎥 Present</button>
+        <h2>Slide Editor</h2>
+        <div class="topbar-buttons">
+          <button class="btn btn-primary" onclick="Editor.showPopup()">
+            ✏️ Edit HTML
+          </button>
+          <button class="btn btn-success" onclick="Editor.togglePresentation()">
+            🎥 Present
+          </button>
+        </div>
       </div>
-      <iframe id="preview"></iframe>
+      <div id="preview">
+        <div class="slide-content" id="main-slide-content">
+          <div class="slide-content-wrapper">
+            <div class="slide-content-inner" id="main-slide-inner">
+              <div class="empty-state">
+                <p>🎨 Start creating your presentation!</p>
+                <p>Click "Edit HTML" to add content to this slide.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="bottom-slide-navigator">
       <ul class="slide-list" id="slideList"></ul>
       <div class="add-slide-button-container">
-        <button class="add-slide" onclick="Editor.addSlide()">
+        <button class="btn btn-success" onclick="Editor.addSlide()">
           ➕ Add Slide
         </button>
       </div>
     </div>
 
     <div id="popup" class="popup">
-      <h3>Edit Slide HTML</h3>
-      <textarea id="popupEditor"></textarea>
-      <div class="popup-buttons">
-        <button class="close" onclick="Editor.hidePopup()">❌ Close</button>
-        <button class="save" onclick="Editor.savePopup()">
-          💾 Save & Preview
-        </button>
+      <div class="popup-content">
+        <h3>Edit Slide HTML</h3>
+        <textarea
+          id="popupEditor"
+          placeholder="Enter your HTML code here..."
+        ></textarea>
+        <div class="popup-buttons">
+          <button class="btn btn-secondary" onclick="Editor.hidePopup()">
+            ❌ Cancel
+          </button>
+          <button class="btn btn-primary" onclick="Editor.savePopup()">
+            💾 Save & Preview
+          </button>
+        </div>
       </div>
     </div>
 
     <div id="presentation-container">
-      <iframe id="presentation-iframe"></iframe>
+      <div id="presentation-content">
+        <div class="presentation-slide" id="presentation-slide"></div>
+      </div>
       <div class="presentation-controls">
-        <button onclick="Editor.prevSlide()">⬅️ Prev</button>
-        <button onclick="Editor.nextSlide()">➡️ Next</button>
-        <button class="exit" onclick="Editor.exitPresentation()">
-          🚪 Exit
+        <button class="btn" onclick="Editor.prevSlide()">⬅️ Previous</button>
+        <button class="btn" onclick="Editor.nextSlide()">➡️ Next</button>
+        <button class="btn btn-danger" onclick="Editor.exitPresentation()">
+          🚪 Exit Presentation
         </button>
       </div>
     </div>
@@ -331,139 +669,193 @@
       const Editor = (() => {
         const slideListEl = document.getElementById("slideList");
         const popupEditor = document.getElementById("popupEditor");
-        const previewFrame = document.getElementById("preview");
+        const mainSlideContent = document.getElementById("main-slide-content");
+        const mainSlideInner = document.getElementById("main-slide-inner");
         const popup = document.getElementById("popup");
         const presentationContainer = document.getElementById(
           "presentation-container"
         );
-        const presentationIframe = document.getElementById(
-          "presentation-iframe"
-        );
+        const presentationSlide = document.getElementById("presentation-slide");
 
-        let slides = [""];
-        let currentSlide = 0;
+        let slides = [
+          `<div style="text-align: center; padding: 60px 20px; font-family: 'Inter', Arial, sans-serif;">
+            <h1 style="color: #6366f1; font-size: 3em; margin-bottom: 20px; font-weight: 700;">
+              Welcome! 🎉
+            </h1>
+            <p style="font-size: 1.5em; color: #64748b; margin-bottom: 30px;">
+              Your amazing presentation starts here
+            </p>
+            <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 20px; border-radius: 12px; display: inline-block;">
+              <p style="margin: 0; font-size: 1.2em;">✨ Click "Edit HTML" to customize this slide</p>
+            </div>
+          </div>`,
+        ];
+        let currentSlideIndex = 0;
 
-        const THUMBNAIL_CONTENT_ASPECT_RATIO = 16 / 9;
-        const THUMBNAIL_CONTAINER_WIDTH = 140;
-        const THUMBNAIL_CONTAINER_HEIGHT =
-          THUMBNAIL_CONTAINER_WIDTH / THUMBNAIL_CONTENT_ASPECT_RATIO;
+        function sanitizeHTML(html) {
+          // Basic HTML sanitization - remove script tags for security
+          return html.replace(
+            /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+            ""
+          );
+        }
 
-        function createThumbnailIframe(htmlContent) {
-          const iframe = document.createElement("iframe");
-          iframe.setAttribute("scrolling", "no");
+        function createThumbnail(htmlContent, index) {
+          const li = document.createElement("li");
+          li.classList.toggle("active", index === currentSlideIndex);
 
-          iframe.onload = () => {
-            const iframeDocument =
-              iframe.contentDocument || iframe.contentWindow.document;
-            iframeDocument.open();
-            iframeDocument.write(htmlContent);
-            iframeDocument.close();
+          const thumbContainer = document.createElement("div");
+          thumbContainer.className = "thumbnail-container";
 
-            if (iframeDocument.body && iframeDocument.body.firstChild) {
-              const originalAssumedWidth = 800;
-              const scaleFactor =
-                THUMBNAIL_CONTAINER_WIDTH / originalAssumedWidth;
+          if (htmlContent.trim()) {
+            const thumbnailContent = document.createElement("div");
+            thumbnailContent.className = "thumbnail-content";
+            thumbnailContent.innerHTML = sanitizeHTML(htmlContent);
+            thumbContainer.appendChild(thumbnailContent);
+          } else {
+            const placeholder = document.createElement("div");
+            placeholder.className = "thumbnail-placeholder";
+            placeholder.textContent = "Empty Slide";
+            thumbContainer.appendChild(placeholder);
+          }
 
-              iframeDocument.body.style.transformOrigin = "top left";
-              iframeDocument.body.style.transform = `scale(${scaleFactor})`;
-              iframeDocument.body.style.width = `${100 / scaleFactor}%`;
-              iframeDocument.body.style.height = `${100 / scaleFactor}%`;
-              iframeDocument.body.style.overflow = "hidden";
-            }
+          li.appendChild(thumbContainer);
+
+          const slideNum = document.createElement("span");
+          slideNum.className = "slide-number";
+          slideNum.textContent = `${index + 1}`;
+          li.appendChild(slideNum);
+
+          li.onclick = () => {
+            currentSlideIndex = index;
+            updateMainPreview();
+            renderSlideList();
           };
 
-          return iframe;
+          return li;
         }
 
         function renderSlideList() {
           slideListEl.innerHTML = "";
           slides.forEach((htmlContent, index) => {
-            const li = document.createElement("li");
-            li.classList.toggle("active", index === currentSlide);
-
-            const thumbContainer = document.createElement("div");
-            thumbContainer.className = "thumbnail-container";
-            thumbContainer.style.height = `${THUMBNAIL_CONTAINER_HEIGHT}px`;
-
-            const iframe = createThumbnailIframe(htmlContent);
-            thumbContainer.appendChild(iframe);
-            li.appendChild(thumbContainer);
-
-            const slideNum = document.createElement("span");
-            slideNum.className = "slide-number";
-            slideNum.textContent = `${index + 1}`;
-            li.appendChild(slideNum);
-
-            li.onclick = () => {
-              currentSlide = index;
-              popupEditor.value = slides[currentSlide];
-              updateMainPreview();
-              renderSlideList();
-            };
+            const li = createThumbnail(htmlContent, index);
             slideListEl.appendChild(li);
           });
+
           const activeLi = slideListEl.querySelector("li.active");
           if (activeLi) {
             activeLi.scrollIntoView({
               behavior: "smooth",
               block: "nearest",
-              inline: "nearest",
+              inline: "center",
             });
           }
         }
 
-        function updateMainPreview() {
-          const doc =
-            previewFrame.contentDocument || previewFrame.contentWindow.document;
-          doc.open();
-          doc.write(slides[currentSlide]);
-          doc.close();
+        function fitSlideToContainer() {
+          const container = mainSlideContent;
+          const inner = mainSlideInner;
 
-          const activeThumbnail = slideListEl.querySelector(
-            `li:nth-child(${currentSlide + 1}) iframe`
-          );
-          if (activeThumbnail) {
-            const thumbDoc =
-              activeThumbnail.contentDocument ||
-              activeThumbnail.contentWindow.document;
-            thumbDoc.open();
-            thumbDoc.write(slides[currentSlide]);
-            thumbDoc.close();
+          if (!inner.hasChildNodes() || inner.querySelector(".empty-state")) {
+            inner.style.transform = "scale(1)";
+            return;
+          }
+
+          // Reset transform để đo kích thước thực
+          inner.style.transform = "scale(1)";
+
+          // Đợi một chút để DOM update
+          setTimeout(() => {
+            const containerRect = container.getBoundingClientRect();
+            const innerRect = inner.getBoundingClientRect();
+
+            const containerWidth = containerRect.width - 40; // Trừ padding
+            const containerHeight = containerRect.height - 40;
+            const innerWidth = innerRect.width;
+            const innerHeight = innerRect.height;
+
+            if (innerWidth === 0 || innerHeight === 0) {
+              inner.style.transform = "scale(1)";
+              return;
+            }
+
+            const scaleX = containerWidth / innerWidth;
+            const scaleY = containerHeight / innerHeight;
+            const scale = Math.min(scaleX, scaleY, 1); // Không phóng to quá 100%
+
+            inner.style.transform = `scale(${scale})`;
+          }, 50);
+        }
+
+        function updateMainPreview() {
+          const currentSlide = slides[currentSlideIndex];
+          if (currentSlide && currentSlide.trim()) {
+            mainSlideInner.innerHTML = sanitizeHTML(currentSlide);
+            mainSlideContent.classList.add("has-content");
+
+            // Fit slide to container
+            requestAnimationFrame(() => {
+              fitSlideToContainer();
+            });
+          } else {
+            mainSlideInner.innerHTML = `
+              <div class="empty-state">
+                <p>🎨 Start creating your presentation!</p>
+                <p>Click "Edit HTML" to add content to this slide.</p>
+              </div>
+            `;
+            mainSlideContent.classList.remove("has-content");
+            mainSlideInner.style.transform = "scale(1)";
           }
         }
 
         function updatePresentation() {
-          const doc =
-            presentationIframe.contentDocument ||
-            presentationIframe.contentWindow.document;
-          doc.open();
-          doc.write(slides[currentSlide]);
-          doc.close();
-        }
-
-        function saveCurrentSlideContentFromPopup() {
-          slides[currentSlide] = popupEditor.value;
+          const currentSlide = slides[currentSlideIndex];
+          if (currentSlide && currentSlide.trim()) {
+            presentationSlide.innerHTML = sanitizeHTML(currentSlide);
+          } else {
+            presentationSlide.innerHTML = `
+              <div style="text-align: center; color: #64748b; font-size: 24px;">
+                <p>This slide is empty</p>
+                <p style="font-size: 16px;">Add some content to see it here!</p>
+              </div>
+            `;
+          }
         }
 
         function addSlide() {
-          slides.push("");
-          currentSlide = slides.length - 1;
-          popupEditor.value = slides[currentSlide];
+          const newSlideContent = `<div style="text-align: center; padding: 60px 20px; font-family: 'Inter', Arial, sans-serif;">
+            <h1 style="color: #6366f1; font-size: 2.5em; margin-bottom: 20px; font-weight: 600;">
+              Slide ${slides.length + 1}
+            </h1>
+            <p style="font-size: 1.3em; color: #64748b; line-height: 1.6;">
+              Add your content here. You can use HTML, CSS, and create beautiful slides!
+            </p>
+            <div style="margin-top: 40px; padding: 20px; background: #f1f5f9; border-radius: 8px; border-left: 4px solid #6366f1;">
+              <p style="margin: 0; color: #475569;">💡 Tip: Use inline styles for best results</p>
+            </div>
+          </div>`;
+
+          slides.push(newSlideContent);
+          currentSlideIndex = slides.length - 1;
           updateMainPreview();
           renderSlideList();
         }
 
         function showPopup() {
-          popupEditor.value = slides[currentSlide];
+          popupEditor.value = slides[currentSlideIndex] || "";
           popup.style.display = "flex";
+          setTimeout(() => popup.classList.add("show"), 10);
+          popupEditor.focus();
         }
 
         function hidePopup() {
-          popup.style.display = "none";
+          popup.classList.remove("show");
+          setTimeout(() => (popup.style.display = "none"), 300);
         }
 
         function savePopup() {
-          saveCurrentSlideContentFromPopup();
+          slides[currentSlideIndex] = popupEditor.value;
           updateMainPreview();
           renderSlideList();
           hidePopup();
@@ -473,36 +865,79 @@
           if (presentationContainer.style.display === "flex") {
             exitPresentation();
           } else {
-            currentSlide = 0;
             updatePresentation();
             presentationContainer.style.display = "flex";
-            presentationIframe.requestFullscreen();
+            // Try to go fullscreen if supported
+            if (presentationContainer.requestFullscreen) {
+              presentationContainer.requestFullscreen().catch(() => {
+                // Fullscreen failed, continue anyway
+              });
+            }
           }
         }
 
         function exitPresentation() {
           presentationContainer.style.display = "none";
-          document.exitFullscreen();
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {
+              // Exit fullscreen failed, continue anyway
+            });
+          }
         }
 
         function prevSlide() {
-          if (currentSlide > 0) {
-            currentSlide--;
+          if (currentSlideIndex > 0) {
+            currentSlideIndex--;
             updatePresentation();
           }
         }
 
         function nextSlide() {
-          if (currentSlide < slides.length - 1) {
-            currentSlide++;
+          if (currentSlideIndex < slides.length - 1) {
+            currentSlideIndex++;
             updatePresentation();
           }
         }
 
+        // Handle keyboard shortcuts
+        document.addEventListener("keydown", (e) => {
+          if (presentationContainer.style.display === "flex") {
+            if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              prevSlide();
+            } else if (e.key === "ArrowRight" || e.key === " ") {
+              e.preventDefault();
+              nextSlide();
+            } else if (e.key === "Escape") {
+              e.preventDefault();
+              exitPresentation();
+            }
+          } else if (popup.style.display === "flex") {
+            if (e.key === "Escape") {
+              e.preventDefault();
+              hidePopup();
+            } else if (e.ctrlKey && e.key === "Enter") {
+              e.preventDefault();
+              savePopup();
+            }
+          }
+        });
+
+        // Close popup when clicking outside
+        popup.addEventListener("click", (e) => {
+          if (e.target === popup) {
+            hidePopup();
+          }
+        });
+
+        // Handle window resize
+        window.addEventListener("resize", () => {
+          fitSlideToContainer();
+        });
+
         function init() {
-          renderSlideList();
           updateMainPreview();
-          popupEditor.value = slides[currentSlide];
+          renderSlideList();
         }
 
         return {
