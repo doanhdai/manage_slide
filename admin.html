@@ -33,6 +33,11 @@
         background-color: #e8f5e9;
         color: #388e3c;
       }
+      .active {
+        background-color: #e0e7ff; /* Ví dụ màu nền xanh nhạt */
+        color: #3730a3; /* Ví dụ màu chữ xanh đậm */
+        font-weight: bold;
+      }
 
       @media (max-width: 768px) {
         .responsive-table-row {
@@ -86,7 +91,8 @@
               <li>
                 <a
                   href="#"
-                  class="flex items-center p-2 rounded-lg bg-indigo-100 text-indigo-700"
+                  class="flex items-center p-2 rounded-lg"
+                  id="LectureRequests"
                 >
                   <i class="fas fa-chalkboard-teacher mr-3"></i>
                   <span>Lecture Requests</span>
@@ -96,6 +102,7 @@
                 <a
                   href="#"
                   class="flex items-center p-2 rounded-lg hover:bg-gray-100 smooth-transition"
+                  id="lessons"
                 >
                   <i class="fas fa-book mr-3"></i>
                   <span>Lessons</span>
@@ -128,6 +135,7 @@
           <div class="bg-white rounded-lg shadow-md p-6">
             <!-- Page Header -->
             <div
+              id="lectureRequestsHeader"
               class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4"
             >
               <h2 class="text-xl font-bold text-gray-800 mb-4 md:mb-0">
@@ -140,6 +148,16 @@
                 <i class="fas fa-plus mr-2"></i>
                 Create Request
               </button>
+            </div>
+
+            <!-- Lessons Header -->
+            <div
+              id="lessonsHeader"
+              class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 mt-2 hidden"
+            >
+              <h2 class="text-xl font-bold text-gray-800 mb-4 md:mb-0">
+                Lessons Management
+              </h2>
             </div>
 
             <!-- Search and Filters -->
@@ -199,9 +217,10 @@
                     class="bg-gray-50 text-left text-gray-700 uppercase text-sm"
                   >
                     <th class="py-3 px-4">Request ID</th>
+                    <th class="py-3 px-4">Lecture Name</th>
                     <th class="py-3 px-4">Created At</th>
                     <th class="py-3 px-4">Requester</th>
-                    <th class="py-3 px-4">Lecture Name</th>
+
                     <th class="py-3 px-4">Class</th>
                     <th class="py-3 px-4">Subject</th>
                     <th class="py-3 px-4">Lecture Link</th>
@@ -268,7 +287,7 @@
     >
       <div class="modal-backdrop absolute inset-0"></div>
       <div
-        class="bg-white rounded-lg shadow-xl z-10 w-full max-w-md mx-4 smooth-transition"
+        class="bg-white rounded-lg shadow-xl z-10 w-full max-w-2xl mx-4 smooth-transition"
       >
         <div class="p-6">
           <div class="flex justify-between items-center mb-4">
@@ -283,19 +302,6 @@
             </button>
           </div>
           <form id="requestForm" class="space-y-4">
-            <div>
-              <label
-                for="lectureName"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Lecture Name</label
-              >
-              <input
-                type="text"
-                id="lectureName"
-                required
-                class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label
@@ -358,6 +364,32 @@
                 <option value="Chapter 2">Chapter 2</option>
                 <option value="Chapter 3">Chapter 3</option>
               </select>
+            </div>
+            <div>
+              <label
+                for="lectureName"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Lecture Name</label
+              >
+              <input
+                type="text"
+                id="lectureName"
+                required
+                class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+            <div>
+              <label
+                for="linkGenspack"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Link Genspack</label
+              >
+              <input
+                type="text"
+                id="linkGenspack"
+                required
+                class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
             </div>
             <div>
               <label
@@ -491,6 +523,8 @@
 
       // DOM Elements
       const requestsTableBody = document.getElementById("requestsTableBody");
+      const lessonBtn = document.getElementById("lessons");
+      const LectureRequests = document.getElementById("LectureRequests");
       const emptyState = document.getElementById("emptyState");
       const createRequestBtn = document.getElementById("createRequestBtn");
       const createRequestModal = document.getElementById("createRequestModal");
@@ -505,6 +539,10 @@
       const classFilter = document.getElementById("classFilter");
       const subjectFilter = document.getElementById("subjectFilter");
       const chapterFilter = document.getElementById("chapterFilter");
+      const lectureRequestsHeader = document.getElementById(
+        "lectureRequestsHeader"
+      );
+      const lessonsHeader = document.getElementById("lessonsHeader");
 
       // Variables for deletion
       let requestToDelete = null;
@@ -512,6 +550,25 @@
       // Initialize the page
       document.addEventListener("DOMContentLoaded", function () {
         renderRequests(lectureRequests);
+        LectureRequests.classList.add("active");
+        lectureRequestsHeader.classList.remove("hidden");
+        lessonsHeader.classList.add("hidden");
+
+        lessonBtn.addEventListener("click", () => {
+          renderLessons(lectureRequests);
+          lessonBtn.classList.add("active");
+          LectureRequests.classList.remove("active");
+          lectureRequestsHeader.classList.add("hidden");
+          lessonsHeader.classList.remove("hidden");
+        });
+
+        LectureRequests.addEventListener("click", () => {
+          renderRequests(lectureRequests);
+          LectureRequests.classList.add("active");
+          lessonBtn.classList.remove("active");
+          lectureRequestsHeader.classList.remove("hidden");
+          lessonsHeader.classList.add("hidden");
+        });
 
         // Modal toggle events
         createRequestBtn.addEventListener("click", () => {
@@ -602,14 +659,15 @@
                       request.id
                     }</td>
                     <td class="responsive-table-cell py-2 px-2">${
+                      request.lectureName
+                    }</td>
+                    <td class="responsive-table-cell py-2 px-2">${
                       request.createdAt
                     }</td>
                     <td class="responsive-table-cell py-2 px-2">${
                       request.requester
                     }</td>
-                    <td class="responsive-table-cell py-2 px-2">${
-                      request.lectureName
-                    }</td>
+                    
                     <td class="responsive-table-cell py-2 px-2">${
                       request.class
                     }</td>
@@ -638,7 +696,11 @@
                                     data-id="${request.id}" ${
             createBtnDisabled ? "disabled" : ""
           }>
-                                <i class="fas fa-plus"></i> Create
+                                ${
+                                  request.status === "New"
+                                    ? `<a href="index.html" target="_blank"><i class="fas fa-plus"></i> Create</a>`
+                                    : `<i class="fas fa-plus"></i> Create`
+                                }
                             </button>
                             <button class="delete-request-btn p-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 smooth-transition" data-id="${
                               request.id
@@ -647,6 +709,94 @@
                             </button>
                         </div>
                     </td>
+                `;
+
+          requestsTableBody.appendChild(row);
+        });
+
+        // Add event listeners to newly created buttons
+        document.querySelectorAll(".create-lecture-btn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const requestId = this.getAttribute("data-id");
+            createLecture(requestId);
+          });
+        });
+
+        document.querySelectorAll(".delete-request-btn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            requestToDelete = this.getAttribute("data-id");
+            deleteConfirmModal.classList.remove("hidden");
+          });
+        });
+      }
+      function renderLessons(lessons) {
+        requestsTableBody.innerHTML = "";
+
+        if (lessons.length === 0) {
+          emptyState.classList.remove("hidden");
+          requestsTableBody.classList.add("hidden");
+          return;
+        }
+
+        emptyState.classList.add("hidden");
+        requestsTableBody.classList.remove("hidden");
+
+        lessons.forEach((request) => {
+          const row = document.createElement("tr");
+          row.className =
+            "responsive-table-row hover:bg-gray-50 smooth-transition";
+
+          // Status class mapping
+          let statusClass = "";
+          if (request.status === "New") statusClass = "status-new";
+          else if (request.status === "Creating")
+            statusClass = "status-creating";
+          else if (request.status === "Created") statusClass = "status-created";
+
+          const createBtnDisabled =
+            request.status === "Creating" || request.status === "Created";
+
+          row.innerHTML = `
+                <td class="responsive-table-cell py-2 px-2 font-medium text-gray-700">${
+                  request.id
+                }</td>
+                <td class="responsive-table-cell py-2 px-2">${
+                  request.lectureName
+                }</td>
+                <td class="responsive-table-cell py-2 px-2">${
+                  request.createdAt
+                }</td>
+                <td class="responsive-table-cell py-2 px-2">${
+                  request.requester
+                }</td>
+                
+                <td class="responsive-table-cell py-2 px-2">${
+                  request.class
+                }</td>
+                <td class="responsive-table-cell py-2 px-2">${
+                  request.subject
+                }</td>
+                <td class="responsive-table-cell py-2 px-2">
+                    ${
+                      request.lectureLink
+                        ? `<a href="index.html" target="_blank" class="text-indigo-600 hover:underline">View</a>`
+                        : '<span class="text-gray-400">N/A</span>'
+                    }
+                </td>
+                <td class="responsive-table-cell py-4 px-4">
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClass}">${
+            request.status
+          }</span>
+                </td>
+                <td class="responsive-table-cell py-4 px-4">
+                    <div class="flex justify-center items-center">
+                    <button class="delete-request-btn p-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 smooth-transition" data-id="${
+                      request.id
+                    }">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    </div>
+                </td>
                 `;
 
           requestsTableBody.appendChild(row);
