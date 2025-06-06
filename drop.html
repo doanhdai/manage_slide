@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    .thumbnail {
+  padding: 8px;
+  margin: 5px 0;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  cursor: move;
+  background: red;
+}
+
+.thumbnail.dragging {
+  opacity: 0.5;
+  border: 2px dashed #666;
+}
+
+</style>
+<body>
+    <div id="thumbContainer">
+  <div class="thumbnail" draggable="true" >Slide 1 <button class="buttonDel">X</button></div>
+  <div class="thumbnail" draggable="true" >Slide 2 <button class="buttonDel">X</button></div>
+  <div class="thumbnail" draggable="true" >Slide 3 <button class="buttonDel">X</button></div>
+</div>
+
+</body>
+<script>
+ 
+    const thumbContainer = document.getElementById('thumbContainer');
+let draggedIndex = null;
+
+thumbContainer.addEventListener('dragstart', (e) => {
+  const thumb = e.target.closest('.thumbnail');
+  if (!thumb) return;
+  draggedIndex = Number(thumb.dataset.index);
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', draggedIndex); // Dữ liệu truyền khi kéo
+  thumb.classList.add('dragging');
+});
+
+thumbContainer.addEventListener('dragover', (e) => {
+  e.preventDefault(); // Bắt buộc để cho phép drop
+  const thumb = e.target.closest('.thumbnail');
+  if (!thumb) return;
+
+  const hoverIndex = Number(thumb.dataset.index);
+
+  // Chèn vị trí đẩy thả (chèn trước hoặc sau tùy vị trí con trỏ)
+  const rect = thumb.getBoundingClientRect();
+  const offset = e.clientY - rect.top;
+
+  if (offset > rect.height / 2) {
+    thumbContainer.insertBefore(document.querySelector('.dragging'), thumb.nextSibling);
+  } else {
+    thumbContainer.insertBefore(document.querySelector('.dragging'), thumb);
+  }
+});
+
+thumbContainer.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const draggedData = e.dataTransfer.getData('text/plain');
+  const droppedOnThumb = e.target.closest('.thumbnail');
+  if (!droppedOnThumb) return;
+
+  const droppedIndex = Number(droppedOnThumb.dataset.index);
+
+  // Cập nhật lại mảng slides
+  const movedSlide = slides.splice(draggedIndex, 1)[0];
+  slides.splice(droppedIndex, 0, movedSlide);
+
+  // Cập nhật currentSlideIndex nếu cần (giống ví dụ trước)
+  if (currentSlideIndex === draggedIndex) {
+    currentSlideIndex = droppedIndex;
+  } else if (
+    currentSlideIndex > draggedIndex && currentSlideIndex <= droppedIndex
+  ) {
+    currentSlideIndex--;
+  } else if (
+    currentSlideIndex < draggedIndex && currentSlideIndex >= droppedIndex
+  ) {
+    currentSlideIndex++;
+  }
+  renderSlideList();
+  updateMainPreview();
+  document.querySelector('.dragging').classList.remove('dragging');
+  draggedIndex = null;
+});
+
+thumbContainer.addEventListener('dragend', (e) => {
+  const dragging = document.querySelector('.dragging');
+  if (dragging) dragging.classList.remove('dragging');
+  draggedIndex = null;
+});
+
+</script>
+</html>

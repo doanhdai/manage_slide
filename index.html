@@ -322,6 +322,18 @@
         overflow: hidden;
         flex-shrink: 0;
         box-shadow: var(--shadow-sm);
+        cursor: move;
+      }
+      .thumbNailDrop.dragging {
+        background: red;
+      }
+      .styleThumbNailLi :active {
+        background: yellow;
+      }
+
+      .slide-list li.dragging {
+        opacity: 0.5;
+        box-shadow: 0 0 10px 3px #007bff;
       }
 
       .slide-list li:last-child {
@@ -341,7 +353,14 @@
         border-color: var(--border-hover);
         transform: translateY(-2px);
         box-shadow: var(--shadow-lg);
+        display: flex;
       }
+
+      .slide-list li:hover .buttonDel {
+        display: flex;
+        z-index: 100;
+      }
+
       .slide-list li:last-child {
         display: flex;
         align-items: center;
@@ -396,6 +415,16 @@
         padding: 2px 6px;
         border-radius: var(--radius-sm);
         box-shadow: var(--shadow-sm);
+      }
+      .buttonDel {
+        position: absolute;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        top: 0px;
+        right: 2px;
+        font-size: 10px;
+        display: none;
       }
 
       .popup {
@@ -626,18 +655,54 @@
           padding: 8px;
         }
       }
+      .thumbNailStyle {
+        position: relative;
+        background-color: red;
+        color: red;
+      }
     </style>
   </head>
   <body>
     <div class="main-content-area">
       <div class="topbar">
-        <h2>Slide Editor</h2>
+        <div style="display: flex; gap: 40px">
+          <h2>Slide Editor</h2>
+          <div style="display: flex">
+            <p>Nhập tiêu đề:</p>
+            <input
+              style="height: 30px; margin-top: 10px; margin-right: 10px"
+              type="text"
+              id="titleInput"
+              name="title"
+              placeholder="Nhập tiêu đề..."
+            />
+            <input
+              style="height: 30px; margin-top: 10px; margin-right: 10px"
+              type="text"
+              id="lectureId"
+              name="title"
+              placeholder="LectureId...."
+            />
+          </div>
+        </div>
+
         <div class="topbar-buttons">
-          <button class="btn btn-primary" onclick="Editor.showPopup()">
+          <button
+            id="htmlContent"
+            class="btn btn-primary"
+            onclick="Editor.showPopup()"
+          >
             ✏️ Edit HTML
           </button>
           <button class="btn btn-success" onclick="Editor.togglePresentation()">
             🎥 Present
+          </button>
+          <button
+            class="btn btn-primary"
+            id="saveAllSlide"
+            onclick="Editor.saveAllSlide()"
+          >
+            💾 Save
           </button>
         </div>
       </div>
@@ -691,233 +756,369 @@
     </div>
 
     <script>
-      const Editor = (() => {
-        const slideListEl = document.getElementById("slideList");
-        const popupEditor = document.getElementById("popupEditor");
-        const mainSlideContent = document.getElementById("main-slide-content");
-        const mainSlideInner = document.getElementById("main-slide-inner");
-        const popup = document.getElementById("popup");
-        const presentationContainer = document.getElementById(
-          "presentation-container"
-        );
-        const presentationSlide = document.getElementById("presentation-slide");
+                  const Editor = (() => {
+                    const slideListEl = document.getElementById("slideList");
+                    const popupEditor = document.getElementById("popupEditor");
+                    const mainSlideContent = document.getElementById("main-slide-content");
+                    const mainSlideInner = document.getElementById("main-slide-inner");
+                    const popup = document.getElementById("popup");
+                    const presentationContainer = document.getElementById(
+                      "presentation-container"
+                    );
+                    const presentationSlide = document.getElementById("presentation-slide");
 
-        let slides = [""];
-        let currentSlideIndex = 0;
+                    let slides = [""];
+                    let currentSlideIndex = 0;
+                    let li = null;
+                    function sanitizeHTML(html) {
+                      // Basic HTML sanitization - remove script tags for security
+                      return html.replace(
+                        /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+                        ""
+                      );
+                    }
 
-        function sanitizeHTML(html) {
-          // Basic HTML sanitization - remove script tags for security
-          return html.replace(
-            /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-            ""
-          );
-        }
+                    function createThumbnail(htmlContent, index) {
+                      const li = document.createElement("li");
+                      li.draggable = "true";
+                      li.classList.toggle("active", index === currentSlideIndex);
+                      li.classList.add("thumbNailStyle");
+                      const thumbContainer = document.createElement("div");
+                      thumbContainer.className = "thumbnail-container";
 
-        function createThumbnail(htmlContent, index) {
-          const li = document.createElement("li");
-          li.classList.toggle("active", index === currentSlideIndex);
+                      if (htmlContent.trim()) {
+                        const thumbnailContent = document.createElement("div");
+                        thumbnailContent.className = "thumbnail-content";
+                        thumbnailContent.innerHTML = sanitizeHTML(htmlContent);
+                        thumbContainer.appendChild(thumbnailContent);
+                      } else {
+                        const placeholder = document.createElement("div");
 
-          const thumbContainer = document.createElement("div");
-          thumbContainer.className = "thumbnail-container";
+                        placeholder.className = "thumbnail-placeholder";
+                        placeholder.textContent = "Empty Slide";
 
-          if (htmlContent.trim()) {
-            const thumbnailContent = document.createElement("div");
-            thumbnailContent.className = "thumbnail-content";
-            thumbnailContent.innerHTML = sanitizeHTML(htmlContent);
-            thumbContainer.appendChild(thumbnailContent);
-          } else {
-            const placeholder = document.createElement("div");
-            placeholder.className = "thumbnail-placeholder";
-            placeholder.textContent = "Empty Slide";
-            thumbContainer.appendChild(placeholder);
-          }
+                        thumbContainer.appendChild(placeholder);
+                      }
 
-          li.appendChild(thumbContainer);
+                      li.appendChild(thumbContainer);
+                      const buttonDel = document.createElement("button");
+                      buttonDel.className = "buttonDel";
+                      buttonDel.textContent = "❌";
+                      thumbContainer.appendChild(buttonDel);
+                      thumbContainer.onclick = function (e) {
+                        const target = e.target;
+                        const thumb = target.closest(".thumbnail");
+                        const index = Number(currentSlideIndex);
+                        if (target.classList.contains("buttonDel")) {
+                          deleteSlide(index);
+                        }
+                      };
 
-          const slideNum = document.createElement("span");
-          slideNum.className = "slide-number";
-          slideNum.textContent = `${index + 1}`;
-          li.appendChild(slideNum);
+                      const slideNum = document.createElement("span");
+                      slideNum.className = "slide-number";
+                      slideNum.textContent = `${index + 1}`;
+                      li.appendChild(slideNum);
+                      li.onclick = () => {
+                        currentSlideIndex = index;
+                        updateMainPreview();
+                        renderSlideList();
+                      };
+                      return li;
+                    }
 
-          li.onclick = () => {
-            currentSlideIndex = index;
-            updateMainPreview();
-            renderSlideList();
-          };
+                    function renderSlideList() {
+                      slideListEl.innerHTML = "";
+                      const slidesData = [];
+                      slides.forEach((htmlContent, index) => {
+                        const li = createThumbnail(htmlContent, index);
+                        slideListEl.appendChild(li);
+                        // add data vào array
+                        slidesData.push({
+                          lecture_id: document.getElementById("lectureId").value,
+                          title: document.getElementById("titleInput").value,
+                          html_content:htmlContent,
+                          slide_order: index+1,
+                        });
 
-          return li;
-        }
+                      });
 
-        function renderSlideList() {
-          slideListEl.innerHTML = "";
-          slides.forEach((htmlContent, index) => {
-            const li = createThumbnail(htmlContent, index);
-            slideListEl.appendChild(li);
-          });
+                      const addSlideBtn = document.createElement("li");
+                      addSlideBtn.className = "add-slide-item";
+                      addSlideBtn.textContent = "+";
+                      addSlideBtn.onclick = addSlide;
 
-          const addSlideBtn = document.createElement("li");
-          addSlideBtn.className = "add-slide-item";
-          addSlideBtn.textContent = "+";
-          addSlideBtn.onclick = addSlide;
+                      slideListEl.appendChild(addSlideBtn);
+                      const activeLi = slideListEl.querySelector("li.active");
+                      if (activeLi) {
+                        activeLi.scrollIntoView({
+                          behavior: "smooth",
+                          block: "nearest",
+                          inline: "center",
+                        });
+                      }
+                      return slidesData;
+                    }
+                    function saveAllSlide() {
+                      const slidesData = renderSlideList();
+                      console.log(slidesData)
+                      fetch("http://localhost:3000/api/createSlide", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ slides: slidesData }),
+                    })
+                      .then((res) => {
+                        if (!res.ok) throw new Error("Lỗi lưu slides");
+                        console.log(res)
+                        return res.json();
+                      })
+                      .then((data) => {
+                        console.log("✅ Lưu slides thành công:", data);
+                        window.location.href = "/admin.html";
+                      })
+                      .catch((err) => {
+                        console.error("❌ Lỗi lưu slides:", err);
+                      });
+                  }
 
-          slideListEl.appendChild(addSlideBtn);
+                    
 
-          const activeLi = slideListEl.querySelector("li.active");
-          if (activeLi) {
-            activeLi.scrollIntoView({
-              behavior: "smooth",
-              block: "nearest",
-              inline: "center",
-            });
-          }
-        }
+                    function updateMainPreview() {
+                      const currentSlide = slides[currentSlideIndex];
+                      if (currentSlide && currentSlide.trim()) {
+                        mainSlideInner.innerHTML = sanitizeHTML(currentSlide);
+                        mainSlideContent.classList.add("has-content");
+                      } else {
+                        mainSlideInner.innerHTML = `
+                          <div class="empty-state">
+                            <p>🎨 Start creating your presentation!</p>
+                            <p>Click "Edit HTML" to add content to this slide.</p>
+                          </div>
+                        `;
+                        mainSlideContent.classList.remove("has-content");
+                      }
+                    }
 
-        function updateMainPreview() {
-          const currentSlide = slides[currentSlideIndex];
-          if (currentSlide && currentSlide.trim()) {
-            mainSlideInner.innerHTML = sanitizeHTML(currentSlide);
-            mainSlideContent.classList.add("has-content");
-          } else {
-            mainSlideInner.innerHTML = `
-              <div class="empty-state">
-                <p>🎨 Start creating your presentation!</p>
-                <p>Click "Edit HTML" to add content to this slide.</p>
-              </div>
-            `;
-            mainSlideContent.classList.remove("has-content");
-          }
-        }
+                    function updatePresentation() {
+                      const currentSlide = slides[currentSlideIndex];
+                      if (currentSlide && currentSlide.trim()) {
+                        presentationSlide.innerHTML = sanitizeHTML(currentSlide);
+                      } else {
+                        presentationSlide.innerHTML = `
+                          <div style="text-align: center; color: #64748b; font-size: 24px;">
+                            <p>This slide is empty</p>
+                            <p style="font-size: 16px;">Add some content to see it here!</p>
+                          </div>
+                        `;
+                      }
+                    }
 
-        function updatePresentation() {
-          const currentSlide = slides[currentSlideIndex];
-          if (currentSlide && currentSlide.trim()) {
-            presentationSlide.innerHTML = sanitizeHTML(currentSlide);
-          } else {
-            presentationSlide.innerHTML = `
-              <div style="text-align: center; color: #64748b; font-size: 24px;">
-                <p>This slide is empty</p>
-                <p style="font-size: 16px;">Add some content to see it here!</p>
-              </div>
-            `;
-          }
-        }
+                    function addSlide() {
+                      const newSlideContent = ``;
+                      slides.push(newSlideContent);
+                      currentSlideIndex = slides.length - 1;
+                      updateMainPreview();
+                      renderSlideList();
+                    }
+                    function deleteSlide(index) {
+                      if (confirm("Bạn muốn xóa slide này")) {
+                        return slides.splice(index, 1);
+                        if (slides.length === 0) {
+                          currentSlideIndex == -1;
+                        } else if (currentSlideIndex >= index) {
+                          currentSlideIndex = Math.max(0, currentSlideIndex - 1);
+                        }
+                      }
+                      updateMainPreview;
+                      renderSlideList;
+                    }
 
-        function addSlide() {
-          const newSlideContent = ``;
+                    function showPopup() {
+                      popupEditor.value = slides[currentSlideIndex] || "";
+                      popup.style.display = "flex";
+                      setTimeout(() => popup.classList.add("show"), 10);
+                      popupEditor.focus();
+                    }
 
-          slides.push(newSlideContent);
-          currentSlideIndex = slides.length - 1;
-          updateMainPreview();
-          renderSlideList();
-        }
+                    function hidePopup() {
+                      popup.classList.remove("show");
+                      setTimeout(() => (popup.style.display = "none"), 300);
+                    }
 
-        function showPopup() {
-          popupEditor.value = slides[currentSlideIndex] || "";
-          popup.style.display = "flex";
-          setTimeout(() => popup.classList.add("show"), 10);
-          popupEditor.focus();
-        }
+                    function savePopup() {
+                      slides[currentSlideIndex] = popupEditor.value;
+                      updateMainPreview();
+                      renderSlideList();
+                      hidePopup();
+                    }
 
-        function hidePopup() {
-          popup.classList.remove("show");
-          setTimeout(() => (popup.style.display = "none"), 300);
-        }
+                    function togglePresentation() {
+                      if (presentationContainer.style.display === "flex") {
+                        exitPresentation();
+                      } else {
+                        updatePresentation();
+                        presentationContainer.style.display = "flex";
+                        // Try to go fullscreen if supported
+                        if (presentationContainer.requestFullscreen) {
+                          presentationContainer.requestFullscreen().catch(() => {
+                            // Fullscreen failed, continue anyway
+                          });
+                        }
+                      }
+                    }
 
-        function savePopup() {
-          slides[currentSlideIndex] = popupEditor.value;
-          updateMainPreview();
-          renderSlideList();
-          hidePopup();
-        }
+                    function exitPresentation() {
+                      presentationContainer.style.display = "none";
+                      if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(() => {
+                          // Exit fullscreen failed, continue anyway
+                        });
+                      }
+                    }
 
-        function togglePresentation() {
-          if (presentationContainer.style.display === "flex") {
-            exitPresentation();
-          } else {
-            updatePresentation();
-            presentationContainer.style.display = "flex";
-            // Try to go fullscreen if supported
-            if (presentationContainer.requestFullscreen) {
-              presentationContainer.requestFullscreen().catch(() => {
-                // Fullscreen failed, continue anyway
-              });
-            }
-          }
-        }
+                    function prevSlide() {
+                      if (currentSlideIndex > 0) {
+                        currentSlideIndex--;
+                        updatePresentation();
+                      }
+                    }
 
-        function exitPresentation() {
-          presentationContainer.style.display = "none";
-          if (document.exitFullscreen) {
-            document.exitFullscreen().catch(() => {
-              // Exit fullscreen failed, continue anyway
-            });
-          }
-        }
+                    function nextSlide() {
+                      if (currentSlideIndex < slides.length - 1) {
+                        currentSlideIndex++;
+                        updatePresentation();
+                      }
+                    }
 
-        function prevSlide() {
-          if (currentSlideIndex > 0) {
-            currentSlideIndex--;
-            updatePresentation();
-          }
-        }
+                    // Handle keyboard shortcuts
+                    document.addEventListener("keydown", (e) => {
+                      if (presentationContainer.style.display === "flex") {
+                        if (e.key === "ArrowLeft") {
+                          e.preventDefault();
+                          prevSlide();
+                        } else if (e.key === "ArrowRight" || e.key === " ") {
+                          e.preventDefault();
+                          nextSlide();
+                        } else if (e.key === "Escape") {
+                          e.preventDefault();
+                          exitPresentation();
+                        }
+                      } else if (popup.style.display === "flex") {
+                        if (e.key === "Escape") {
+                          e.preventDefault();
+                          hidePopup();
+                        } else if (e.ctrlKey && e.key === "Enter") {
+                          e.preventDefault();
+                          savePopup();
+                        }
+                      }
+                    });
 
-        function nextSlide() {
-          if (currentSlideIndex < slides.length - 1) {
-            currentSlideIndex++;
-            updatePresentation();
-          }
-        }
+                    // Close popup when clicking outside
+                    popup.addEventListener("click", (e) => {
+                      if (e.target === popup) {
+                        hidePopup();
+                      }
+                    });
 
-        // Handle keyboard shortcuts
-        document.addEventListener("keydown", (e) => {
-          if (presentationContainer.style.display === "flex") {
-            if (e.key === "ArrowLeft") {
-              e.preventDefault();
-              prevSlide();
-            } else if (e.key === "ArrowRight" || e.key === " ") {
-              e.preventDefault();
-              nextSlide();
-            } else if (e.key === "Escape") {
-              e.preventDefault();
-              exitPresentation();
-            }
-          } else if (popup.style.display === "flex") {
-            if (e.key === "Escape") {
-              e.preventDefault();
-              hidePopup();
-            } else if (e.ctrlKey && e.key === "Enter") {
-              e.preventDefault();
-              savePopup();
-            }
-          }
-        });
+                    function init() {
+                      updateMainPreview();
+                      renderSlideList();
+                    }
+                    function handleDrop(slides, onReorder) {
+                      slideListEl.addEventListener("dragstart", (e) => {
+                        const thumb = e.target.closest(".thumbNailDrop");
+                        if (!thumb) return;
+                        draggedIndex = Number(thumb.dataset.index); // create index thumbnail
+                        e.dataTransfer.effectAllowed = "move"; // approve drop
+                        e.dataTransfer.setData("text/plain", draggedIndex); // Dữ liệu truyền khi kéo
+                        thumb.classList.add("dragging"); // add css
+                      });
+                      slideListEl.addEventListener("dragover", (e) => {
+                        e.preventDefault(); // Bắt buộc để cho phép drop
+                        const thumb = e.target.closest(".thumbNailDrop");
+                        if (!thumb) return;
 
-        // Close popup when clicking outside
-        popup.addEventListener("click", (e) => {
-          if (e.target === popup) {
-            hidePopup();
-          }
-        });
+                        const hoverIndex = Number(thumb.dataset.index);
+                        // Chèn vị trí đẩy thả (chèn trước hoặc sau tùy vị trí con trỏ)
+                        const rect = thumb.getBoundingClientRect();
+                        const offset = e.clientY - rect.top;
 
-        function init() {
-          updateMainPreview();
-          renderSlideList();
-        }
+                        if (offset > rect.height / 2) {
+                          thumbContainer.insertBefore(
+                            document.querySelector(".dragging"),
+                            thumb.nextSibling
+                          );
+                        } else {
+                          thumbContainer.insertBefore(
+                            document.querySelector(".dragging"),
+                            thumb
+                          );
+                        }
+                      });
 
-        return {
-          addSlide,
-          showPopup,
-          hidePopup,
-          savePopup,
-          init,
-          togglePresentation,
-          prevSlide,
-          nextSlide,
-          exitPresentation,
-        };
-      })();
+                      slideListEl.addEventListener("drop", (e) => {
+                        let draggedIndex = null;
 
-      Editor.init();
+                        e.preventDefault();
+                        const draggedData = e.dataTransfer.getData("text/plain");
+                        const droppedOnThumb = e.target.closest(".thumbNailDrop");
+                        if (!droppedOnThumb) return;
+
+                        const droppedIndex = Number(droppedOnThumb.dataset.index);
+
+                        // Cập nhật lại mảng slides
+                        const movedSlide = slides.splice(draggedIndex, 1)[0];
+                        slides.splice(droppedIndex, 0, movedSlide);
+
+                        // Cập nhật currentSlideIndex nếu cần (giống ví dụ trước)
+                        if (currentSlideIndex === draggedIndex) {
+                          currentSlideIndex = droppedIndex;
+                        } else if (
+                          currentSlideIndex > draggedIndex &&
+                          currentSlideIndex <= droppedIndex
+                        ) {
+                          currentSlideIndex--;
+                        } else if (
+                          currentSlideIndex < draggedIndex &&
+                          currentSlideIndex >= droppedIndex
+                        ) {
+                          currentSlideIndex++;
+                        }
+                        renderSlideList();
+                        updateMainPreview();
+
+                        document.querySelector(".dragging").classList.remove("dragging");
+                        draggedIndex = null;
+                      });
+
+                      slideListEl.addEventListener("dragend", (e) => {
+                        const dragging = document.querySelector(".dragging");
+                        if (dragging) dragging.classList.remove("dragging");
+                        draggedIndex = null;
+                      });
+
+
+                    }
+
+
+
+                    return {
+                      addSlide,
+                      deleteSlide,
+                      showPopup,
+                      hidePopup,
+                      savePopup,
+                      init,
+                      togglePresentation,
+                      prevSlide,
+                      nextSlide,
+                      exitPresentation,
+                      handleDrop,
+                      saveAllSlide,
+                    };
+                  })();
+
+                  Editor.init();
     </script>
   </body>
 </html>

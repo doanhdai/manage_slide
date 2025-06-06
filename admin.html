@@ -642,7 +642,6 @@
         viewLectureForm.addEventListener("submit", async function (e) {
           e.preventDefault();
           if (!currentLectureId) return;
-
           try {
             const response = await fetch(
               `http://localhost:3000/api/lecture-requests/${currentLectureId}`,
