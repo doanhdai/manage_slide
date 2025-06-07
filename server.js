@@ -57,7 +57,7 @@ app.post("/api/lecture-requests", (req, res) => {
       link_genspack,
       description,
       status: 'New',
-      full_name: 'Admin' // Giả sử là admin
+      //full_name: 'Admin'
     });
   });
 });
@@ -122,6 +122,8 @@ app.delete("/api/lecture-requests/:id", (req, res) => {
     });
   });
 });
+
+
 
 // Start server
 app.listen(3000, () => {
