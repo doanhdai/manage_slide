@@ -37,10 +37,10 @@ CREATE TABLE IF NOT EXISTS `lectures` (
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table lessonsdb.lectures: ~3 rows (approximately)
-INSERT INTO `lectures` (`id`, `created_at`, `user_id`, `lecture_name`, `subject`, `chapter`, `lecture_link`, `link_genspack`, `status`, `description`) VALUES
-	(1, '2025-06-06 08:30:00', 1, 'Cộng các số trong phạm vi 10', 'Toán', 'Chương 1: Số học cơ bản', NULL, NULL, 'New', NULL),
-	(2, '2025-06-06 09:00:00', 2, 'Luyện đọc âm đầu L/N', 'Tiếng Việt', 'Chương 1: Âm đầu', NULL, NULL, 'New', NULL),
-	(4, '2025-06-06 10:25:18', 1, 'bài 1', 'Math', 'Chapter 1', NULL, 'http://127.0.0.1:5500/manage_slide/admin.html#', 'New', NULL);
+-- INSERT INTO `lectures` (`id`, `created_at`, `user_id`, `lecture_name`, `subject`, `chapter`, `lecture_link`, `link_genspack`, `status`, `description`) VALUES
+-- 	(1, '2025-06-06 08:30:00', 1, 'Cộng các số trong phạm vi 10', 'Toán', 'Chương 1: Số học cơ bản', NULL, NULL, 'New', NULL),
+-- 	(2, '2025-06-06 09:00:00', 2, 'Luyện đọc âm đầu L/N', 'Tiếng Việt', 'Chương 1: Âm đầu', NULL, NULL, 'New', NULL),
+-- 	(4, '2025-06-06 10:25:18', 1, 'bài 1', 'Math', 'Chapter 1', NULL, 'http://127.0.0.1:5500/manage_slide/admin.html#', 'New', NULL);
 
 -- Dumping structure for table lessonsdb.slides
 CREATE TABLE IF NOT EXISTS `slides` (
@@ -56,27 +56,27 @@ CREATE TABLE IF NOT EXISTS `slides` (
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table lessonsdb.slides: ~6 rows (approximately)
-INSERT INTO `slides` (`id`, `lecture_id`, `title`, `html_content`, `slide_order`, `created_at`) VALUES
-	(1, 1, 'Giới thiệu bài học', '<h1>Bài học hôm nay: Cộng các số trong phạm vi 10</h1>', 1, '2025-06-06 09:39:20'),
-	(2, 1, 'Ví dụ minh họa', '<p>2 + 3 = 5</p>', 2, '2025-06-06 09:39:20'),
-	(3, 1, 'Bài tập nhỏ', '<p>Tính: 4 + 5 = ?</p>', 3, '2025-06-06 09:39:20'),
-	(4, 2, 'Khởi động', '<h2>Phân biệt âm L và N</h2>', 1, '2025-06-06 09:39:20'),
-	(5, 2, 'Ví dụ', '<ul><li>Lá</li><li>Ná</li></ul>', 2, '2025-06-06 09:39:20'),
-	(6, 2, 'Bài tập luyện đọc', '<p>Điền L hoặc N vào chỗ trống: __a, __a</p>', 3, '2025-06-06 09:39:20');
+-- INSERT INTO `slides` (`id`, `lecture_id`, `title`, `html_content`, `slide_order`, `created_at`) VALUES
+-- 	(1, 1, 'Giới thiệu bài học', '<h1>Bài học hôm nay: Cộng các số trong phạm vi 10</h1>', 1, '2025-06-06 09:39:20'),
+-- 	(2, 1, 'Ví dụ minh họa', '<p>2 + 3 = 5</p>', 2, '2025-06-06 09:39:20'),
+-- 	(3, 1, 'Bài tập nhỏ', '<p>Tính: 4 + 5 = ?</p>', 3, '2025-06-06 09:39:20'),
+-- 	(4, 2, 'Khởi động', '<h2>Phân biệt âm L và N</h2>', 1, '2025-06-06 09:39:20'),
+-- 	(5, 2, 'Ví dụ', '<ul><li>Lá</li><li>Ná</li></ul>', 2, '2025-06-06 09:39:20'),
+-- 	(6, 2, 'Bài tập luyện đọc', '<p>Điền L hoặc N vào chỗ trống: __a, __a</p>', 3, '2025-06-06 09:39:20');
 
 -- Dumping structure for table lessonsdb.users
-CREATE TABLE IF NOT EXISTS `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `full_name` varchar(255) NOT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+-- CREATE TABLE IF NOT EXISTS `users` (
+--   `id` int NOT NULL AUTO_INCREMENT,
+--   `full_name` varchar(255) NOT NULL,
+--   `email` varchar(255) DEFAULT NULL,
+--   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+--   PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table lessonsdb.users: ~2 rows (approximately)
-INSERT INTO `users` (`id`, `full_name`, `email`, `created_at`) VALUES
-	(1, 'Alice Nguyen', 'alice@example.com', '2025-06-06 09:09:12'),
-	(2, 'Bob Tran', 'bob@example.com', '2025-06-06 09:09:12');
+-- INSERT INTO `users` (`id`, `full_name`, `email`, `created_at`) VALUES
+-- 	(1, 'Alice Nguyen', 'alice@example.com', '2025-06-06 09:09:12'),
+-- 	(2, 'Bob Tran', 'bob@example.com', '2025-06-06 09:09:12');
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

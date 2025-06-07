@@ -642,7 +642,6 @@
         viewLectureForm.addEventListener("submit", async function (e) {
           e.preventDefault();
           if (!currentLectureId) return;
-
           try {
             const response = await fetch(
               `http://localhost:3000/api/lecture-requests/${currentLectureId}`,
@@ -770,21 +769,26 @@
         statusFilter.addEventListener("change", filterRequests);
         chapterFilter.addEventListener("change", filterRequests);
 
+        document.addEventListener("click", function (e) {
+          if (e.target.classList.contains("view-present-btn")) {
+            e.preventDefault();
+            const lectureId = e.target.getAttribute("data-id");
+            window.location.href = `index.html?lectureId=${lectureId}&mode=presentation`;
+          }
+        });
+
         // Add click event for lecture ID
         document.addEventListener("click", async function (e) {
           if (e.target.classList.contains("view-lecture-btn")) {
             e.preventDefault();
             const lectureId = e.target.getAttribute("data-id");
-            console.log("Clicked lecture ID:", lectureId); // Debug log
             const lecture = lectureRequests.find(
               (l) => l.id === parseInt(lectureId)
             );
 
             if (lecture) {
-              console.log("Found lecture:", lecture); // Debug log
+              // Nếu chưa tạo, hiển thị thông tin bài giảng như cũ
               currentLectureId = lectureId;
-
-              // Fill form with lecture data
               document.getElementById("viewSubject").value = lecture.subject;
               document.getElementById("viewChapter").value = lecture.chapter;
               document.getElementById("viewLectureName").value =
@@ -794,7 +798,6 @@
               document.getElementById("viewDescription").value =
                 lecture.description || "";
 
-              // Enable/disable description editing based on status
               const descriptionField =
                 document.getElementById("viewDescription");
               const saveButton = document.getElementById("saveDescriptionBtn");
@@ -810,8 +813,6 @@
               }
 
               viewLectureModal.classList.remove("hidden");
-            } else {
-              console.log("Lecture not found for ID:", lectureId); // Debug log
             }
           }
         });
@@ -896,9 +897,9 @@
                         ${request.id}
                       </a>
                     </td>
-                    <td class="responsive-table-cell py-2 px-2">${
-                      request.lectureName
-                    }</td>
+                    <td class="responsive-table-cell py-2 px-2 view-present-btn" data-id="${
+                      request.id
+                    }">${request.lectureName}</td>
                     <td class="responsive-table-cell py-2 px-2">${
                       request.createdAt
                     }</td>
