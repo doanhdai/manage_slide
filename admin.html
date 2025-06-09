@@ -39,6 +39,11 @@
         font-weight: bold;
       }
 
+      .lecture-name-hover:hover {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
       @media (max-width: 768px) {
         .responsive-table-row {
           flex-direction: column;
@@ -694,7 +699,7 @@
             lectureName: item.lecture_name || "Untitled",
             subject: item.subject || "General",
             chapter: item.chapter || "",
-            lectureLink: item.link || "",
+            lectureLink: item.lecture_link || "",
             status: item.status || "New",
             description: item.description || "",
             link_genspack: item.link_genspack || "",
@@ -747,7 +752,7 @@
               lectureName: result.lecture_name,
               subject: result.subject,
               chapter: result.chapter,
-              lectureLink: result.link_genspack || "",
+              lectureLink: result.lecture_link || "",
               status: result.status || "New",
               description: result.description || "",
               link_genspack: result.link_genspack || "",
@@ -773,7 +778,13 @@
           if (e.target.classList.contains("view-present-btn")) {
             e.preventDefault();
             const lectureId = e.target.getAttribute("data-id");
-            window.location.href = `index.html?lectureId=${lectureId}&mode=presentation`;
+            const lecture = lectureRequests.find(
+              (l) => l.id === parseInt(lectureId)
+            );
+
+            if (lecture && lecture.status === "Created") {
+              window.location.href = `index.html?lectureId=${lectureId}`;
+            }
           }
         });
 
@@ -850,6 +861,7 @@
                 (req) => req.id !== parseInt(requestToDelete)
               );
               renderRequests(lectureRequests);
+              console.log(lectureRequests);
 
               // Đóng modal và reset biến
               deleteConfirmModal.classList.add("hidden");
@@ -876,6 +888,7 @@
 
         requests.forEach((request) => {
           const row = document.createElement("tr");
+          console.log(request);
           row.className =
             "responsive-table-row hover:bg-gray-50 smooth-transition";
 
@@ -897,9 +910,9 @@
                         ${request.id}
                       </a>
                     </td>
-                    <td class="responsive-table-cell py-2 px-2 view-present-btn" data-id="${
-                      request.id
-                    }">${request.lectureName}</td>
+                    <td class="responsive-table-cell py-2 px-2 view-present-btn ${
+                      request.status === "Created" ? "lecture-name-hover" : ""
+                    }" data-id="${request.id}">${request.lectureName}</td>
                     <td class="responsive-table-cell py-2 px-2">${
                       request.createdAt
                     }</td>
@@ -915,7 +928,10 @@
                     <td class="responsive-table-cell py-2 px-2">
                         ${
                           request.lectureLink
-                            ? `<a href="index.html" target="_blank" class="text-indigo-600 hover:underline">View</a>`
+                            ? `<div class="space-y-1">
+                                <div><a href="index.html?lectureId=${request.id}" target="_blank" class="text-indigo-600 hover:underline">Giáo viên</a></div>
+                                <div><a href="index.html?lectureId=${request.id}&mode=student" target="_blank" class="text-indigo-600 hover:underline">Học sinh</a></div>
+                               </div>`
                             : '<span class="text-gray-400">N/A</span>'
                         }
                     </td>
