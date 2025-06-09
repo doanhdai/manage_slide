@@ -660,6 +660,7 @@
         background-color: red;
         color: red;
       }
+      
     </style>
   </head>
   <body>
@@ -667,33 +668,20 @@
       <div class="topbar">
         <div style="display: flex; gap: 40px">
           <h2>Slide Editor</h2>
-          <div style="display: flex">
+          <div style="display: flex; margin-top: 10px; gap: 10px">
             <p>Nhập tiêu đề:</p>
             <input
-              style="height: 30px; margin-top: 10px; margin-right: 10px"
+              style="height: 25px"
               type="text"
               id="titleInput"
               name="title"
+              required
               placeholder="Nhập tiêu đề..."
-            />
-            <input
-              style="height: 30px; margin-top: 10px; margin-right: 10px"
-              type="text"
-              id="lectureId"
-              name="title"
-              placeholder="LectureId...."
             />
           </div>
         </div>
 
         <div class="topbar-buttons">
-          <button
-            id="htmlContent"
-            class="btn btn-primary"
-            onclick="Editor.showPopup()"
-          >
-            ✏️ Edit HTML
-          </button>
           <button class="btn btn-success" onclick="Editor.togglePresentation()">
             🎥 Present
           </button>
@@ -710,7 +698,7 @@
         <div class="slide-content" id="main-slide-content">
           <div class="slide-content-wrapper">
             <div class="slide-content-inner" id="main-slide-inner">
-              <div class="empty-state">
+              <div class="empty-state" id ="draft_html">
                 <p>🎨 Start creating your presentation!</p>
                 <p>Click "Edit HTML" to add content to this slide.</p>
               </div>
@@ -884,14 +872,18 @@
         function renderSlideList() {
           slideListEl.innerHTML = "";
           const slidesData = [];
+          const urlParams = new URLSearchParams(window.location.search);
+          const lectureId = urlParams.get("id");
+
           slides.forEach((htmlContent, index) => {
             const li = createThumbnail(htmlContent, index);
+            const title = document.getElementById("titleInput").value.trim();
+            const html_content = htmlContent?.trim();
             slideListEl.appendChild(li);
-            // add data vào array
             slidesData.push({
-              lecture_id: document.getElementById("lectureId").value,
-              title: document.getElementById("titleInput").value,
-              html_content: htmlContent,
+              lecture_id: lectureId,
+              title: title,
+              html_content: html_content,
               slide_order: index + 1,
             });
           });
@@ -914,7 +906,14 @@
         }
         function saveAllSlide() {
           const slidesData = renderSlideList();
-          console.log(slidesData);
+          const invalidSlide = slidesData.find(
+            (slide) => !slide.title?.trim() || !slide.html_content?.trim()
+          );
+          if (invalidSlide) {
+            alert("Tất cả các slide phải có tiêu đề và nội dung.");
+            return;
+          }
+
           fetch("http://localhost:3000/api/createSlide", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -941,10 +940,19 @@
             mainSlideContent.classList.add("has-content");
           } else {
             mainSlideInner.innerHTML = `
-                          <div class="empty-state">
+                          <div class="empty-state" id = "craft_html">
+                            
                             <p>🎨 Start creating your presentation!</p>
                             <p>Click "Edit HTML" to add content to this slide.</p>
+                            <button
+                              id="htmlContent"
+                              class="btn btn-primary"
+                              onclick="Editor.showPopup()"
+                            >
+                              ✏️ Edit HTML
+                            </button>
                           </div>
+                           
                         `;
             mainSlideContent.classList.remove("has-content");
           }
@@ -1170,7 +1178,25 @@
             elem.msRequestFullscreen();
           }
         }
+        // Tự động lưu khi người dùng rời trang hoặc reload
+    window.addEventListener("beforeunload", () => {
+        
+      const slideData = {
+        title: document.getElementById("titleInput").value,
+        html : document.getElementById("popupEditor").value,
+      };
+      localStorage.setItem("draft_title", JSON.stringify(slideData));
+    });
+        //Tự động tải dữ liệu đã lưu khi trang mở lại
+ window.addEventListener("DOMContentLoaded", () => {
+      const saved = JSON.parse(localStorage.getItem("draft_title") || "{}");
+      if (saved.title) document.getElementById("titleInput").value = saved.title;
+      if (saved.html) document.getElementById("popupEditor").value = saved.html;
+      console.log(saved)
+      console.log("html",saved.html)
+    });
 
+    
         return {
           addSlide,
           deleteSlide,
