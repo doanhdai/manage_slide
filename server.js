@@ -9,7 +9,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "",
+  password: "", 
   database: "lessonsdb",
 });
 
@@ -202,6 +202,97 @@ app.get("/api/slides/:lectureId", (req, res) => {
       return res.status(500).json({ error: "Không thể lấy slides" });
     }
     res.json(results);
+  });
+});
+
+// Update slide order
+app.put("/api/slides/order", (req, res) => {
+  const { lecture_id, slides } = req.body;
+  
+  if (!lecture_id || !Array.isArray(slides)) {
+    return res.status(400).json({ error: "Invalid request data" });
+  }
+
+  // Use a transaction to ensure all updates succeed or fail together
+  db.beginTransaction(err => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to start transaction" });
+    }
+
+    let completed = 0;
+    let hasError = false;
+
+    // Update each slide's order
+    slides.forEach((slide, index) => {
+      const sql = "UPDATE slides SET slide_order = ? WHERE id = ? AND lecture_id = ?";
+      db.query(sql, [index + 1, slide.id, lecture_id], (err) => {
+        if (err) {
+          hasError = true;
+          console.error("Error updating slide order:", err);
+        }
+        
+        completed++;
+        if (completed === slides.length) {
+          if (hasError) {
+            db.rollback(() => {
+              res.status(500).json({ error: "Failed to update slide order" });
+            });
+          } else {
+            db.commit((err) => {
+              if (err) {
+                db.rollback(() => {
+                  res.status(500).json({ error: "Failed to commit transaction" });
+                });
+                return;
+              }
+              res.json({ message: "Slide order updated successfully" });
+            });
+          }
+        }
+      });
+    });
+  });
+});
+
+// Delete slide
+app.delete("/api/slides/:slideId", (req, res) => {
+  const slideId = req.params.slideId;
+  
+  db.beginTransaction(err => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to start transaction" });
+    }
+
+    // Delete the slide
+    const deleteSql = "DELETE FROM slides WHERE id = ?";
+    db.query(deleteSql, [slideId], (err, result) => {
+      if (err) {
+        db.rollback(() => {
+          console.error("Error deleting slide:", err);
+          res.status(500).json({ error: "Failed to delete slide" });
+        });
+        return;
+      }
+
+      if (result.affectedRows === 0) {
+        db.rollback(() => {
+          res.status(404).json({ error: "Slide not found" });
+        });
+        return;
+      }
+
+      // Commit the transaction
+      db.commit(err => {
+        if (err) {
+          db.rollback(() => {
+            console.error("Error committing transaction:", err);
+            res.status(500).json({ error: "Failed to commit transaction" });
+          });
+          return;
+        }
+        res.json({ message: "Slide deleted successfully" });
+      });
+    });
   });
 });
 
